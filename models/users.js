@@ -2,11 +2,15 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const usersSchema = new mongoose.Schema({
-    name: {type : String, required : true, unique: true},
-    password : {type : String, required: true}
-
+    firstName: String,
+    lastName : String,
+    userName : {type : String, required : true, unique : true},
+    email : String,
+    password : {type : String, required: true},
+    useEmailForApi : {type : Boolean, default : false}
 });
-
+// useEmailForApi they should have to choose to turn this 
+// feature on 
 usersSchema.set('toJSON', {
     virtuals: true,     // include built-in virtual `id`
     transform: (doc, result) => {
