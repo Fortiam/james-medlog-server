@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 
 const calEventsSchema = new mongoose.Schema({
     title: String, //they can leave this blank. will have some nifty default thing..
+    start: {type: String, required: true}, // the starting time of the event for the calendar
+    end: String,    //ending time for the event, is optional for now
     patientId : {type: mongoose.Schema.Types.ObjectId, ref: 'Patient', required : true},
     medId : {type: mongoose.Schema.Types.ObjectId, ref: 'Med', required : true},
     userId : {type: mongoose.Schema.Types.ObjectId, ref: 'User', required : true},
