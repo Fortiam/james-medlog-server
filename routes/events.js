@@ -1,11 +1,15 @@
 const express = require('express');
 const Router = express.Router();
-const { Event } = require('../models/events');
+//const mongoose = require('mongoose');
+const passport = require('passport');
+const CalEvent = require('../models/calEvents');
 const { checkIdIsValid, checkTitle, checkMedId, checkPatientId, checkUserId } = require('../utils/validate');
 
+//protected endpoints with jwt
+Router.use('/', passport.authenticate('jwt', {session : false, failWithError: true }));
 //get all events route
 Router.get('/', (req, res, next)=>{
-    return Event.find()
+    return CalEvent.find()
     .then((response)=>{
         res.json(response);
     })
@@ -22,7 +26,7 @@ Router.get('/:id', (req, res, next)=>{
         err.status = 400;
         return next(err);
     }
-    return Event.findById(id)
+    return CalEvent.findById(id)
     .then(data=> {
         if(data.id){
         res.json(data);
@@ -49,7 +53,7 @@ Router.post('/', (req, res, next)=>{
     }
     //cleared validations -- still need to test for ids belong to userId
     const newEvent = {title, patientId, medId, userId};
-    return Event.insertMany(newEvent, {new: true})
+    return CalEvent.insertMany(newEvent, {new: true})
     .then((data) => {
         res.json(data);
     })
@@ -76,7 +80,7 @@ Router.put('/:id', (req, res, next)=>{
     }
     //cleared valids -- still need to test for ids belong to userId
     const updateEvent = {title, patientId, medId, userId};
-    return Event.findByIdAndUpdate(id, updateEvent, {new : true})
+    return CalEvent.findByIdAndUpdate(id, updateEvent, {new : true})
         .then(data => res.json(data))
         .catch(err => next(err));
 });
@@ -91,7 +95,7 @@ Router.delete('/:id', (req, res, next)=>{
     }
     //also check if event belongs to userId
     //delete it
-    return Event.findByIdAndRemove(id)
+    return CalEvent.findByIdAndRemove(id)
         .then(()=>{
             res.status(204).json({"message": `event with id: ${id} has been deleted.`});
         })

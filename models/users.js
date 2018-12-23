@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const usersSchema = new mongoose.Schema({
     firstName: String,
     lastName : String,
-    userName : {type : String, required : true, unique : true},
+    username : {type : String, required : true, unique : true},
     email : String,
     password : {type : String, required: true},
     useEmailForApi : {type : Boolean, default : false}
@@ -21,7 +21,10 @@ usersSchema.set('toJSON', {
 });
 
 usersSchema.methods.serialize = function(){
-    return { name : this.name };
+    return { username : this.username,
+            firstName : this.firstName,
+            lastName: this.lastName,
+    };
 };
 
 usersSchema.methods.validatePassword = function(AttemptedPassword){

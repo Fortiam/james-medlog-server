@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const eventsSchema = new mongoose.Schema({
+const calEventsSchema = new mongoose.Schema({
     title: String, //they can leave this blank. will have some nifty default thing..
     patientId : {type: mongoose.Schema.Types.ObjectId, ref: 'Patient', required : true},
     medId : {type: mongoose.Schema.Types.ObjectId, ref: 'Med', required : true},
@@ -9,9 +9,9 @@ const eventsSchema = new mongoose.Schema({
 });
 
 // Add `createdAt` and `updatedAt` fields, useful
-eventsSchema.set('timestamps', true);
+calEventsSchema.set('timestamps', true);
 
-eventsSchema.set('toJSON', {
+calEventsSchema.set('toJSON', {
     virtuals: true,
     transform: (doc, result) => {
       delete result._id;
@@ -19,6 +19,6 @@ eventsSchema.set('toJSON', {
     }
 });
 
-const Event = mongoose.model('Event', eventsSchema);
+const CalEvent = mongoose.model('CalEvent', calEventsSchema);
 
-module.exports = { Event };
+module.exports = { CalEvent };
