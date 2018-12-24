@@ -43,7 +43,7 @@ app.use(express.static('public'));
 
 app.use('/', loginRoute);// for '/' homepage to register
 app.use('/', authRouter);// for /login and /refresh routes
-app.use('/api/users', usersRoutes);
+app.use('/api/users', usersRoutes); // for /api/users/update/:id to edit account and /api/users/deleteMe/:id to remove user account
 app.use('/api/patients', patientsRoutes);
 app.use('/api/meds', medsRoutes);
 app.use('/api/events', eventRoutes);

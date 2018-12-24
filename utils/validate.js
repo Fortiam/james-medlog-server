@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const User = require('../models/users');
 
 function checkIdIsValid(...testMe){
     let badIds = 0;
@@ -70,4 +71,18 @@ function trimName(tooManySpaces){
         return tooManySpaces.trim();
     }
 }
-module.exports = { checkIdIsValid, checkTitle, checkMedId, checkPatientId, checkUserId, checkUsernameAndPassword, trimName };
+function checkUserIdExists(checkMe, againstMe, next){
+    return User.findById(checkMe)
+    .then(result=>{
+        console.log("A--", result._id)
+        console.log("B--", againstMe)
+        if(result._id.toString() === againstMe.toString()){
+            console.log("here match@ 78");
+            return true;//should probably change this to ternary but easier to console log this way
+        }
+        else return false;
+    })
+    .catch(err=>next(err));
+}
+
+module.exports = { checkIdIsValid, checkTitle, checkMedId, checkPatientId, checkUserId, checkUsernameAndPassword, trimName, checkUserIdExists };
