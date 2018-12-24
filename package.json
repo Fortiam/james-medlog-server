@@ -31,8 +31,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "server:prod": "npm run nodeStart pm2 npm run reactStart",
-    "nodeStart" : "nodemon server.js",
+    "nodeStart" : "node server.js",
     "reactStart" : "react-scripts start"
   },
   "eslintConfig": {
