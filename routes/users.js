@@ -7,10 +7,6 @@ const User = require('../models/users');
 //protected endpoints with jwt
 Router.use('/', passport.authenticate('jwt', {session : false, failWithError: true }));
 //edit and update user account
-Router.get("/", function(req,res,next){
-    console.log("Route!");
-    next();
-});
 
 Router.put('/update/:id', function(req, res, next){
     const id = req.params.id;

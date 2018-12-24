@@ -74,10 +74,7 @@ function trimName(tooManySpaces){
 function checkUserIdExists(checkMe, againstMe, next){
     return User.findById(checkMe)
     .then(result=>{
-        console.log("A--", result._id)
-        console.log("B--", againstMe)
         if(result._id.toString() === againstMe.toString()){
-            console.log("here match@ 78");
             return true;//should probably change this to ternary but easier to console log this way
         }
         else return false;
