@@ -27,11 +27,11 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "bash parallel_commands.sh 'npm run nodeStart' 'npm run reactStart'",
+    "start": "node server.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "nodeStart" : "node server.js",
+    
     "reactStart" : "react-scripts start"
   },
   "eslintConfig": {
