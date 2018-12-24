@@ -21,6 +21,4 @@ calEventsSchema.set('toJSON', {
     }
 });
 
-const CalEvent = mongoose.model('CalEvent', calEventsSchema);
-
-module.exports = { CalEvent };
+module.exports = mongoose.model('CalEvent', calEventsSchema); 

@@ -24,6 +24,4 @@ medsSchema.set('toJSON', {
     }
 });
 
-const Med = mongoose.model('Med', medsSchema);
-
-module.exports = { Med };
+module.exports = mongoose.model('Med', medsSchema); 

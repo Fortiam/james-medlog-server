@@ -22,8 +22,8 @@ usersSchema.set('toJSON', {
 
 usersSchema.methods.serialize = function(){
     return { username : this.username,
-            firstName : this.firstName,
-            lastName: this.lastName,
+            // firstName : this.firstName,
+            // lastName: this.lastName,
     };
 };
 
@@ -36,6 +36,4 @@ usersSchema.statics.hashPassword = function(unhashedPass){
  return hashed;
 };
 
-const User = mongoose.model('User', usersSchema);
-
-module.exports = { User };
+module.exports = mongoose.model('User', usersSchema);

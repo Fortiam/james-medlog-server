@@ -20,6 +20,4 @@ patientsSchema.set('toJSON', {
     }
 });
 
-const Patient = mongoose.model('Patient', patientsSchema);
-
-module.exports = { Patient };
+module.exports = mongoose.model('Patient', patientsSchema);

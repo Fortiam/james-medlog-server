@@ -20,6 +20,11 @@ export const registerError = (error)=>({
     error
 });
 
+export const submitAction = values => ({
+    type : 'SUBMIT_ACTION',
+    values
+});
+
 export const registerMe = user => dispatch=> {
     dispatch(registerRequest());
     return fetch(`${API_BASE_URL}/register`, {
@@ -33,5 +38,20 @@ export const registerMe = user => dispatch=> {
     .then(goodData=> {
         dispatch(registerSuccess(goodData))
     })
-    .catch(err=> dispatch(registerError(err)));
+    .catch(err=> {
+        const {message, reason, location} = err;
+        if (reason === 'ValidationError') {
+            return Promise.reject(
+                new SubmissionError({
+                    [location]: message
+                })
+            );
+        }
+        return Promise.reject(
+            new SubmissionError({
+                _error: 'Error submitting message'
+          })
+       );
+        //dispatch(registerError(err))
+    });
 };

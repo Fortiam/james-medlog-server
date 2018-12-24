@@ -25,4 +25,4 @@ authRouter.post('/refresh', jwtAuth, (req, res)=>{
     return res.json({authToken});
 });
 
-module.exports = { authRouter };
+module.exports = authRouter;

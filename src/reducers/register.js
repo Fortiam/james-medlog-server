@@ -7,7 +7,7 @@ const initalState = {
     loading: false
 };
 
-export default function registerReducer (state=initalState, action){
+export function registerReducer (state=initalState, action){
     if (action.type === 'REGISTER_REQUEST') {
         return Object.assign({}, state, {
             loading: true,

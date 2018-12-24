@@ -3,6 +3,7 @@ import FullCalendar from 'fullcalendar-reactwrapper';
 import 'fullcalendar-reactwrapper/dist/css/fullcalendar.min.css';
 import './calendar.css';
 import {connect} from 'react-redux';
+import { Link } from 'react-router-dom';
 //import Button from './button';
 //import * as actions from './actions';
 
@@ -11,6 +12,7 @@ class Calendar extends Component {
         
     }
     render() {
+        if(this.props.loggedId){
         return (
           <div className="main" id='example'>
             <FullCalendar id='james' className="App"
@@ -27,11 +29,18 @@ class Calendar extends Component {
             ></FullCalendar>
             </div>
         );
+        } else {
+            return (<div>Hello there, 
+                 <Link to='/login'>please Log-in!</Link>
+                </div>)
+        }       
     }
 }
 
 const mapStateToProps = (state)=>({
     events : state.events,
-    timeIsNow : state.timeIsNow
+    timeIsNow : state.timeIsNow,
+    whereTo: state.whereTo,
+    loggedId : state.auth.currentUser !== null
   });
-  export default connect(mapStateToProps)(Calendar);
+export default connect(mapStateToProps)(Calendar);

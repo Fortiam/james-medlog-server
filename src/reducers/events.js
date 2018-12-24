@@ -1,7 +1,8 @@
 import moment from 'moment';
 const initalState = {
     events: [],
-    timeIsNow: moment().format()
+    timeIsNow: moment().format(),
+    whereTo: false
 };
 
 export const reducer = (state = initalState, action)=>{

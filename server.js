@@ -7,7 +7,7 @@ const localStrategy = require('./passport/local');
 const jwtStrategy = require('./passport/jwt');
 //Route handlers:
 const loginRoute = require('./routes/login');
-const { authRouter } = require('./routes/authorize');
+const authRouter = require('./routes/authorize');
 const usersRoutes = require('./routes/users');
 const patientsRoutes = require('./routes/patients');
 const medsRoutes = require('./routes/meds');
@@ -15,7 +15,8 @@ const eventRoutes = require('./routes/events');
 
 mongoose.Promise = global.Promise;
 mongoose.set('useNewUrlParser', true);
-
+mongoose.set('useCreateIndex', true);
+mongoose.set('autoIndex', false);
 // require('dotenv').config();
 
 const { PORT, DATABASE_URL } = require('./config');
@@ -29,9 +30,9 @@ app.use(morgan('common'));
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-    res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE');
+    res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE');
     if (req.method === 'OPTIONS') {
-      return res.send(204);
+      return res.sendStatus(204);
     }
     next();
   });

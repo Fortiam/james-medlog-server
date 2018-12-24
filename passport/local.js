@@ -1,32 +1,35 @@
 const { Strategy: LocalStrategy } = require('passport-local');
-const {User} = require('../models/users');
+const User = require('../models/users');
 
-const localStrategy = new LocalStrategy((username, password, done)=>{
+const localStrategy = new LocalStrategy((theUser, thePassword, done)=>{
     let user;
-    User.findOne({ username })
+    return User.findOne({"username": theUser})
     .then(result => {
         user = result;
         if(!user){
             return Promise.reject({
                 reason: 'LoginError',
                 message: 'Wrong username',
-                location : 'username'
+                location : 'username',
+                status : 444
             });
         }
-        return user.validatePassword(password);
+        return user.validatePassword(thePassword);
     })
     .then(isValid => {
         if(!isValid){
             return Promise.reject({
                 reason: 'LoginError',
                 message: 'Wrong password',
-                location : 'password'
+                location : 'password',
+                status : 445
             });
         }
         return done(null, user);
     })
     .catch(err=> {
         if(err.reason === 'LoginError'){
+
             return done(null, false);
         }
         return done(err);
