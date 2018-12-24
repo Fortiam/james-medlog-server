@@ -1,22 +1,17 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Route, Redirect, Link } from 'react-router-dom';
-import Calendar from './calendar';
+import { Link } from 'react-router-dom';
 
 class Main extends Component {
 
-    buttonClick(value){
-             
-    }
     render(){
      if(this.props.loggedIn){
          return (<div>
             <h2>Welcome to the Home Page, this needs to be re-styled..</h2>
             <p><Link to="/calendar" >Visit Calendar</Link></p>
-            <p><button type="button" >Add/Edit new Family Member/pet</button></p>
-            <p><button type="button" >Add/Edit custom Medicine</button></p>
-            <p><button type="button" >Edit Account Details/Info</button></p>
-            
+            <p><Link to='/patient' >Add/Edit new Family Member/pet</Link></p>
+            <p><Link to="/medicine" >Add/Edit custom Medicine</Link></p>
+            <p><Link to="/userinfo" >Edit Account Details/Info</Link></p>
             </div>)
      }
        else return (<div>hello, please Log in..</div>);

@@ -7,6 +7,9 @@ import FormLogin from './formLogin';
 import Header from './header';
 import Main from './main';
 import Calendar from './calendar';
+import Patient from './patient';
+import Medicine from './medicine';
+import Userinfo from './userinfo';
 
 class Home extends Component {
     render(){
@@ -19,6 +22,9 @@ class Home extends Component {
                     <Route exact path='/login' component={FormLogin} />
                     <Route exact path='/main' component={Main} />
                     <Route exact path='/calendar' component={Calendar} />
+                    <Route exact path='/patient' component={Patient} />
+                    <Route exact path='/medicine' component={Medicine} />
+                    <Route exact path='/userinfo' component={Userinfo} />
                     </div>
                 </Router>
                 </div>

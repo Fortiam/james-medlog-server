@@ -9,13 +9,13 @@ import { Link } from 'react-router-dom';
 
 class Calendar extends Component {
     componentDidMount(){
-        
+       //add get all events for current user here 
     }
     render() {
         if(this.props.loggedId){
         return (
           <div className="main" id='example'>
-            <FullCalendar id='james' className="App"
+            <FullCalendar id='calendar' className="App"
             header= {{
               left: 'prev,next today myCustomButton',
               center: 'title',
