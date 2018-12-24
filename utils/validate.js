@@ -84,5 +84,11 @@ function checkUserIdExists(checkMe, againstMe, next){
     })
     .catch(err=>next(err));
 }
-
-module.exports = { checkIdIsValid, checkTitle, checkMedId, checkPatientId, checkUserId, checkUsernameAndPassword, trimName, checkUserIdExists };
+function boolCheck(checkMe){
+    return (typeof(checkMe)=== 'boolean');
+}
+function validEmailAddress(checkMe){
+    const EmailRegExp = /^\w+@\w+[.]\w{1,4}$/gi;
+    return EmailRegExp.test(checkMe); //gonna be fun testing this in mocha
+}
+module.exports = { checkIdIsValid, checkTitle, checkMedId, checkPatientId, checkUserId, checkUsernameAndPassword, trimName, checkUserIdExists, boolCheck, validEmailAddress };

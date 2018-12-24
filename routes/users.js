@@ -1,7 +1,7 @@
 const express = require('express');
 const Router = express.Router();
 const passport = require('passport');
-const { checkIdIsValid, checkUserIdExists } = require('../utils/validate');
+const { checkIdIsValid, checkUserIdExists, boolCheck, checkTitle, validEmailAddress } = require('../utils/validate');
 const User = require('../models/users');
 
 //protected endpoints with jwt
@@ -20,14 +20,37 @@ Router.put('/update/:id', function(req, res, next){
         err.status = 400;
         return next(err);
     }
-    
-    if(checkUserIdExists(userId, id, next)){
-        console.log("hello 25");
+    let { firstName, lastName, email, useEmailForApi, /*username, password*/ } = req.body;
+    //validate optional fields
+    const editedUser = {};
+    if((useEmailForApi !== undefined) && boolCheck(useEmailForApi)){
+        //here useEmail is in req.body && boolCheck should return true for false (bools)
+        editedUser["useEmailForApi"] = useEmailForApi;
     }
-    else {
-    console.log("check for ID return false@ line 28");
+    if(checkTitle(firstName)){
+        editedUser["firstName"] = firstName;
     }
-    res.sendStatus(200);//testing
+    if(checkTitle(lastName)){
+        editedUser["lastName"] = lastName;
+    }
+    if(validEmailAddress(email)){
+        editedUser["email"] = email;
+    }
+    return checkUserIdExists(userId, id, next)
+    .then(isMatch => {
+        if(isMatch){
+            //here url id matches token id
+            return User.findOneAndUpdate({_id: userId}, editedUser, {$set: true, new: true})
+            .then((result=>{res.json(result)}))
+            .catch(err=>next(err));
+        }
+        else {
+            const err = new Error('Invalid id in request');
+            err.status = 400;
+            return next(err);
+        }
+    })
+   .catch(err=>next(err));
 });
 
 //delete user self
