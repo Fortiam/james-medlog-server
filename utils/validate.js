@@ -11,20 +11,30 @@ function checkIdIsValid(...testMe){
     return (badIds === 0);
 }
 
-function checkTitle(testMe){
+function checkString(testMe){
     return(typeof testMe === 'string' && testMe.length > 0);
 }
 
-function checkMedId(testMe){
+// function checkMedId(testMe){
 
-}
+// }
 
-function checkPatientId(testMe){
+// function checkPatientId(testMe){
 
-}
+// }
 
-function checkUserId(testMe){
+// function checkUserId(testMe){
 
+// }
+
+function addOnlyValidFields(baseArray, testArray, name, userId){
+    const newPatientObject = {"name" : name, "userId": userId};//the required fields
+    baseArray.forEach((field, index)=>{
+        if(testArray[index]){
+            newPatientObject[field] = testArray[index];
+        }
+    });
+    return newPatientObject;
 }
 
 function checkUsernameAndPassword(testMe){
@@ -82,13 +92,10 @@ function checkUserIdExists(checkMe, againstMe, next){
     .catch(err=>next(err));
 }
 function boolCheck(checkMe){
-    if(checkMe === "true"){
-    return true;
-    }
-    return false;
+    return (checkMe === "true");//client json transforms boolean into string so the amazing bool code got changed into this :(
 }
 function validEmailAddress(checkMe){
     const EmailRegExp = /^\w+@\w+[.]\w{1,4}$/gi;
     return EmailRegExp.test(checkMe); //gonna be fun testing this in mocha
 }
-module.exports = { checkIdIsValid, checkTitle, checkMedId, checkPatientId, checkUserId, checkUsernameAndPassword, trimName, checkUserIdExists, boolCheck, validEmailAddress };
+module.exports = { checkIdIsValid, checkString, addOnlyValidFields,/* checkMedId, checkPatientId, checkUserId,*/ checkUsernameAndPassword, trimName, checkUserIdExists, boolCheck, validEmailAddress };

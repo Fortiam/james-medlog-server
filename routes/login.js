@@ -1,7 +1,7 @@
 const express = require('express');
 const Router = express.Router();
 const User = require('../models/users');
-const mongoose = require('mongoose');
+//const mongoose = require('mongoose');
 const { checkUsernameAndPassword, trimName } = require('../utils/validate');
 //homepage, no token needed here (pre-login.js might have been better..?)
 // Router.get('/', (req, res, next)=>{

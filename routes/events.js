@@ -3,7 +3,7 @@ const Router = express.Router();
 //const mongoose = require('mongoose');
 const passport = require('passport');
 const CalEvent = require('../models/calEvents');
-const { checkIdIsValid, checkTitle, checkMedId, checkPatientId, checkUserId } = require('../utils/validate');
+const { checkIdIsValid, checkString, /*checkMedId, checkPatientId, checkUserId*/ } = require('../utils/validate');
 
 //protected endpoints with jwt
 Router.use('/', passport.authenticate('jwt', {session : false, failWithError: true }));
@@ -43,7 +43,7 @@ Router.get('/:id', (req, res, next)=>{
 Router.post('/', (req, res, next)=>{
     let { title, patientId, medId, userId } = req.body;
     //validate body ^^
-    if(!checkTitle(title)){
+    if(!checkString(title)){
         title = "Default title for now";//change me later
     }
     if(!checkIdIsValid(patientId, medId, userId)){
@@ -70,7 +70,7 @@ Router.put('/:id', (req, res, next)=>{
         err.status = 400;
         return next(err);
     }
-    if(!checkTitle(title)){
+    if(!checkString(title)){
         title = "Default title for now";//change me later
     }
     if(!checkIdIsValid(patientId, medId, userId)){

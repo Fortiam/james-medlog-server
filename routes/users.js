@@ -1,7 +1,7 @@
 const express = require('express');
 const Router = express.Router();
 const passport = require('passport');
-const { checkIdIsValid, checkUserIdExists, boolCheck, checkTitle, validEmailAddress } = require('../utils/validate');
+const { checkIdIsValid, checkUserIdExists, boolCheck, checkString, validEmailAddress } = require('../utils/validate');
 const User = require('../models/users');
 
 //protected endpoints with jwt
@@ -23,10 +23,10 @@ Router.put('/update/:id', function(req, res, next){
         const defaultFalse = boolCheck(useEmailForApi);
        editedUser["useEmailForApi"] = defaultFalse;
     }
-    if(checkTitle(firstName)){
+    if(checkString(firstName)){
         editedUser["firstName"] = firstName;
-    }
-    if(checkTitle(lastName)){
+    }//reminder to come back to these 3 funcs and merge the dry code
+    if(checkString(lastName)){
         editedUser["lastName"] = lastName;
     }
     if(validEmailAddress(email)){
