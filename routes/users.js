@@ -19,9 +19,9 @@ Router.put('/update/:id', function(req, res, next){
     let { firstName, lastName, email, useEmailForApi, /*username, password*/ } = req.body;
     //validate optional fields
     const editedUser = {};
-    if((useEmailForApi !== undefined) && boolCheck(useEmailForApi)){
-        //here useEmail is in req.body && boolCheck should return true for false (bools)
-        editedUser["useEmailForApi"] = useEmailForApi;
+    if((useEmailForApi !== undefined)){
+        const defaultFalse = boolCheck(useEmailForApi);
+       editedUser["useEmailForApi"] = defaultFalse;
     }
     if(checkTitle(firstName)){
         editedUser["firstName"] = firstName;

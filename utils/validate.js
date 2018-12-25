@@ -82,7 +82,10 @@ function checkUserIdExists(checkMe, againstMe, next){
     .catch(err=>next(err));
 }
 function boolCheck(checkMe){
-    return (typeof(checkMe)=== 'boolean');
+    if(checkMe === "true"){
+    return true;
+    }
+    return false;
 }
 function validEmailAddress(checkMe){
     const EmailRegExp = /^\w+@\w+[.]\w{1,4}$/gi;
