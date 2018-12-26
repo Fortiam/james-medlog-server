@@ -3,7 +3,7 @@ const Router = express.Router();
 //const mongoose = require('mongoose');
 const passport = require('passport');
 const CalEvent = require('../models/calEvents');
-const { checkIdIsValid, checkString, /*checkMedId, checkPatientId, checkUserId*/ } = require('../utils/validate');
+const { checkIdIsValid, checkString } = require('../utils/validate');
 
 //protected endpoints with jwt
 Router.use('/', passport.authenticate('jwt', {session : false, failWithError: true }));

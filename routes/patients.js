@@ -31,7 +31,6 @@ Router.get('/:id', (req, res, next)=>{
     const userId = req.user.id;
     return Patient.findOne({"_id": id, "userId": userId})
         .then(data=>{
-            console.log("testme: ", data);
             res.json(data);
         })
         .catch(err=>next(err));
@@ -54,7 +53,8 @@ Router.post('/', (req, res, next)=>{
     //allergies is an array of strings so we'll handle that logic seperate?
     //we'll come back to ^that after seeing if this logic even works..
     //also reminder we need to kick the habit of using the royal we in comments
-    const newPatientObject = addOnlyValidFields(optionalFields, checkFields, name, userId);
+    const newPatientObject = addOnlyValidFields(optionalFields, checkFields, userId);
+    newPatientObject["name"] = name;
     //now all the fields that have something should be in newPatientObject
     return Patient.create(newPatientObject)
         .then(data=>res.json(data))
@@ -78,7 +78,7 @@ Router.put('/:id', (req, res, next)=>{
     }
     const userId = req.user.id;
     let { name, age, gender, height, weight/*, allergies, doctor*/ } = req.body;
-    //name is technically the only required field
+    if(name){
     const goodName = checkString(name);
     if(!goodName){
         const err = new Error("Name must be at least 1 character!");
@@ -86,12 +86,12 @@ Router.put('/:id', (req, res, next)=>{
         return next(err);
     }
     name = trimName(name);
-    const optionalFields = ["age", "gender", "height", "weight"];
-    const checkFields = [age, gender, height, weight];
-    const newPatientObject = addOnlyValidFields(optionalFields, checkFields, name, userId);
+    }
+    const optionalFields = ["name", "age", "gender", "height", "weight"];//remember to add doctor, allergies
+    const checkFields = [name, age, gender, height, weight];
+    const newPatientObject = addOnlyValidFields(optionalFields, checkFields, userId);
     return Patient.findOneAndUpdate({"_id": id, "userId": userId}, newPatientObject, {$set: true, new: true})
         .then(data=> {
-            console.log("here is after db update results: ", data);
             if(data){
             res.json(data)
             }
@@ -102,7 +102,6 @@ Router.put('/:id', (req, res, next)=>{
             }
         })
         .catch(err=>{
-            console.log("inevidable update error: ", err);
             next(err)});
 });
 //delete a patient (sad) route

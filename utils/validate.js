@@ -15,22 +15,10 @@ function checkString(testMe){
     return(typeof testMe === 'string' && testMe.length > 0);
 }
 
-// function checkMedId(testMe){
-
-// }
-
-// function checkPatientId(testMe){
-
-// }
-
-// function checkUserId(testMe){
-
-// }
-
-function addOnlyValidFields(baseArray, testArray, name, userId){
-    const newPatientObject = {"name" : name, "userId": userId};//the required fields
+function addOnlyValidFields(baseArray, testArray, userId){
+    const newPatientObject = {"userId": userId};//the required field
     baseArray.forEach((field, index)=>{
-        if(testArray[index]){
+        if(testArray[index]!== undefined){
             newPatientObject[field] = testArray[index];
         }
     });
@@ -98,4 +86,4 @@ function validEmailAddress(checkMe){
     const EmailRegExp = /^\w+@\w+[.]\w{1,4}$/gi;
     return EmailRegExp.test(checkMe); //gonna be fun testing this in mocha
 }
-module.exports = { checkIdIsValid, checkString, addOnlyValidFields,/* checkMedId, checkPatientId, checkUserId,*/ checkUsernameAndPassword, trimName, checkUserIdExists, boolCheck, validEmailAddress };
+module.exports = { checkIdIsValid, checkString, addOnlyValidFields, checkUsernameAndPassword, trimName, checkUserIdExists, boolCheck, validEmailAddress };
