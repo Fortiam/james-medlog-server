@@ -14,7 +14,6 @@ Router.get('/', (req, res, next)=>{
     const userId = req.user.id;
     return Patient.find({"userId": userId })
     .then(data=>{
-        console.log("*need to check this line 16: ", data);
         res.json(data);
     })
     .catch(err=>next(err));
@@ -57,7 +56,6 @@ Router.post('/', (req, res, next)=>{
     //also reminder we need to kick the habit of using the royal we in comments
     const newPatientObject = addOnlyValidFields(optionalFields, checkFields, name, userId);
     //now all the fields that have something should be in newPatientObject
-    console.log("age matches check: ", newPatientObject);//expect age: 30 etc
     return Patient.create(newPatientObject)
         .then(data=>res.json(data))
         .catch(err=> {
@@ -119,7 +117,10 @@ Router.delete('/:id', (req, res, next)=>{
     }
     const userId = req.user.id;
     return Patient.findOneAndRemove({"_id": id, "userId": userId})
-        .then(()=>res.sendStatus(204))
+        .then(()=>{
+            return Patient.find({"userId": userId})
+        })
+        .then(data=> res.json(data))
         .catch(err=> next(err));
 });
 
