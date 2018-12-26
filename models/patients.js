@@ -6,9 +6,9 @@ const patientsSchema = new mongoose.Schema({
     age : Number,
     gender : String,
     height : String,
-    allergies : [{named : String}],
+    allergies : String,
     weight : String,
-    doctor : {name : String, email: String}
+    doctor : [{name : String, contact: String}]
 });
 //we don't math height, it's just for the records, a string is fine
 

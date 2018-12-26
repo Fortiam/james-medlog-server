@@ -22,6 +22,7 @@ function addOnlyValidFields(baseArray, testArray, userId){
             newPatientObject[field] = testArray[index];
         }
     });
+        
     return newPatientObject;
 }
 
