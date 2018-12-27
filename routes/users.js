@@ -3,6 +3,8 @@ const Router = express.Router();
 const passport = require('passport');
 const { checkIdIsValid, checkUserIdExists, boolCheck, checkString, validEmailAddress } = require('../utils/validate');
 const User = require('../models/users');
+const Patient = require('../models/patients');
+const Med = require('../models/meds');
 
 //protected endpoints with jwt
 Router.use('/', passport.authenticate('jwt', {session : false, failWithError: true }));
@@ -58,7 +60,9 @@ Router.delete('/deleteMe/:id', function(req, res, next){
         err.status = 400;
         return next(err);
     }
-    return User.findOneAndRemove({id, userId})
+    //remove all the patients, meds, and the user too
+    //remind come back here and all events to removal when events actually are a thing..
+    Promise.all([User.findOneAndRemove({"_id": userId}), Med.deleteMany({"userId": userId}), Patient.deleteMany({"userId": userId})])
         .then(()=>res.sendStatus(204))
         .catch(err=>next(err));
 });
