@@ -15,6 +15,12 @@ function checkString(testMe){
     return(typeof testMe === 'string' && testMe.length > 0);
 }
 
+function checkArray(testArray){
+    let badString = 0;
+    testArray.forEach(stringy => (stringy.length > 0)? true: badString++);
+    return (badString === 0);
+}
+
 function addOnlyValidFields(baseArray, testArray, userId){
     const newPatientObject = {"userId": userId};//the required field
     baseArray.forEach((field, index)=>{
@@ -87,4 +93,4 @@ function validEmailAddress(checkMe){
     const EmailRegExp = /^\w+@\w+[.]\w{1,4}$/gi;
     return EmailRegExp.test(checkMe); //gonna be fun testing this in mocha
 }
-module.exports = { checkIdIsValid, checkString, addOnlyValidFields, checkUsernameAndPassword, trimName, checkUserIdExists, boolCheck, validEmailAddress };
+module.exports = { checkIdIsValid, checkString, addOnlyValidFields, checkUsernameAndPassword, trimName, checkUserIdExists, boolCheck, validEmailAddress, checkArray };
