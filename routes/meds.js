@@ -3,7 +3,7 @@ const Router = express.Router();
 const passport = require('passport');
 const Med = require('../models/meds');
 const User = require('../models/users');
-const { checkIdIsValid, checkArray } = require('../utils/validate');
+const { checkIdIsValid, checkArray, checkNumberAboveZero } = require('../utils/validate');
 //protected endpoints with jwt
 Router.use('/', passport.authenticate('jwt', {session : false, failWithError: true }));
 //get all meds route
@@ -30,19 +30,21 @@ Router.get('/:id', (req, res, next)=>{
 //create new med
 Router.post('/', (req, res, next)=>{
     const userId = req.user.id;
-    let { name, dosage, rateAmount, rateInterval, howLongAmount, howLongForDays } = req.body;
-    const goodStrings = checkArray([name, rateAmount, rateInterval, howLongForDays]);
+    let { name, dosage, rateAmount,  howLongAmount/*, rateInterval, howLongForDays*/ } = req.body;
+    const goodStrings = checkArray([name, dosage, /*rateInterval, howLongForDays*/]);
     if(!goodStrings){
         const err = new Error("Missing data in request body");
         err.status = 400;
         return next(err);
     }
-    if(parseInt(dosage) < 1 || parseInt(howLongAmount) < 1){
+    if(!checkNumberAboveZero(rateAmount)|| !checkNumberAboveZero(howLongAmount)){
         const err = new Error("Bad dosage amount in request body");
         err.status = 400;
         return next(err);
     }
-    return Med.create({userId, name, dosage, rateAmount, rateInterval, howLongAmount, howLongForDays})
+    rateAmount = Number(rateAmount);
+    howLongAmount = Number(howLongAmount);
+    return Med.create({userId, name, dosage, rateAmount, howLongAmount,/* rateInterval, howLongForDays*/})
         .then(data=>res.json(data))
         .catch(err=>next(err));
 });
@@ -56,19 +58,22 @@ Router.put('/:id', (req, res, next)=>{
         return next(err);
     }
     const userId = req.user.id;
-    let { name, dosage, rateAmount, rateInterval, howLongAmount, howLongForDays } = req.body;
-    const goodStrings = checkArray([name, rateAmount, rateInterval, howLongForDays]);
+    let { name, dosage, rateAmount, howLongAmount, /*rateInterval,  howLongForDays */} = req.body;
+        
+    const goodStrings = checkArray([name, dosage]);
     if(!goodStrings){
         const err = new Error("Missing data in request body");
+        err.status = 418;
+        return next(err);
+    }
+    if(!checkNumberAboveZero(rateAmount) || !checkNumberAboveZero(howLongAmount)){
+        const err = new Error("Bad numbers in request body");
         err.status = 400;
         return next(err);
     }
-    if(parseInt(dosage) < 1 || parseInt(howLongAmount) <1){
-        const err = new Error("Bad dosage amount in request body");
-        err.status = 400;
-        return next(err);
-    }
-    return Med.findOneAndUpdate({userId, "_id": id} , {name, dosage, rateAmount, rateInterval, howLongAmount, howLongForDays}, {$set: true, new: true})
+    rateAmount = Number(rateAmount);
+    howLongAmount = Number(howLongAmount);
+    return Med.findOneAndUpdate({userId, "_id": id} , {name, dosage, rateAmount, howLongAmount/*, rateInterval,  howLongForDays*/}, {$set: true, new: true})
         .then(data=>res.json(data))
         .catch(err=>next(err));
 });

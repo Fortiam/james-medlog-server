@@ -5,9 +5,9 @@ const medsSchema = new mongoose.Schema({
     userId : {type: mongoose.Schema.Types.ObjectId, ref: 'User', required : true},
     dosage : {type : String, required : true},
     rateAmount : { type : Number, required : true},
-    rateInterval : { type : String, required : true},
+    // rateInterval : { type : String, required : true},//this is always 'hours'
     howLongAmount : { type : Number, required : true},
-    howLongForDays : { type : String, required : true}
+    // howLongForDays : { type : String, required : true}//this is always 'days'
 });
 
 // dosage example : 2 pills, or 1 teaspoon
@@ -24,6 +24,10 @@ const medsSchema = new mongoose.Schema({
    howLongAmount = 7       number
    howLongForDays = "days"    string
 */
+medsSchema.virtual("doubleCheck").get(function() {
+    return `Take ${this.dosage} every ${this.rateAmount} hours, for ${this.howLongAmount} days.`;
+});
+
 medsSchema.set('toJSON', {
     virtuals: true,     // include built-in virtual `id`
     transform: (doc, result) => {
