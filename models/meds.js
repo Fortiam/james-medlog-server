@@ -5,11 +5,11 @@ const medsSchema = new mongoose.Schema({
     userId : {type: mongoose.Schema.Types.ObjectId, ref: 'User', required : true},
     dosage : {type : String, required : true},
     rateAmount : { type : Number, required : true},
-    // rateInterval : { type : String, required : true},//this is always 'hours'
     howLongAmount : { type : Number, required : true},
-    // howLongForDays : { type : String, required : true}//this is always 'days'
 });
 
+// rateInterval : { type : String, required : true},//this is always 'hours'
+// howLongForDays : { type : String, required : true}//this is always 'days'
 // dosage example : 2 pills, or 1 teaspoon
 // we do _not_ do stuff with the dosage value, so a string with numbers in it is fine
 

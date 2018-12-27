@@ -3,7 +3,7 @@ const Router = express.Router();
 const passport = require('passport');
 const Med = require('../models/meds');
 const User = require('../models/users');
-const { checkIdIsValid, checkArray, checkNumberAboveZero } = require('../utils/validate');
+const { checkIdIsValid, checkArray, checkNumberAboveZero, checkString } = require('../utils/validate');
 //protected endpoints with jwt
 Router.use('/', passport.authenticate('jwt', {session : false, failWithError: true }));
 //get all meds route
@@ -59,21 +59,20 @@ Router.put('/:id', (req, res, next)=>{
     }
     const userId = req.user.id;
     let { name, dosage, rateAmount, howLongAmount, /*rateInterval,  howLongForDays */} = req.body;
-        
-    const goodStrings = checkArray([name, dosage]);
-    if(!goodStrings){
-        const err = new Error("Missing data in request body");
-        err.status = 418;
-        return next(err);
+    const updateObj = {};
+    if(checkNumberAboveZero(rateAmount)){
+        updateObj['rateAmount'] = Number(rateAmount);
     }
-    if(!checkNumberAboveZero(rateAmount) || !checkNumberAboveZero(howLongAmount)){
-        const err = new Error("Bad numbers in request body");
-        err.status = 400;
-        return next(err);
+    if(checkNumberAboveZero(howLongAmount)){
+        updateObj['howLongAmount'] = Number(howLongAmount);
     }
-    rateAmount = Number(rateAmount);
-    howLongAmount = Number(howLongAmount);
-    return Med.findOneAndUpdate({userId, "_id": id} , {name, dosage, rateAmount, howLongAmount/*, rateInterval,  howLongForDays*/}, {$set: true, new: true})
+    if(checkString(name)){
+        updateObj['name'] = name;
+    }
+    if(checkString(dosage)){
+        updateObj['dosage'] = dosage;
+    }
+    return Med.findOneAndUpdate({userId, "_id": id} , updateObj, {$set: true, new: true})
         .then(data=>res.json(data))
         .catch(err=>next(err));
 });
