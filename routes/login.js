@@ -16,7 +16,7 @@ Router.post('/register', function(req, res, next){
     const isLegit = checkUsernameAndPassword([username, password]);
     if(!isLegit.good){
         const err = new Error(`${isLegit.why} is not valid`);
-        err.status = 403;
+        err.status = 401;
         return next(err);
     }
     firstName = trimName(firstName);
@@ -39,7 +39,7 @@ Router.post('/register', function(req, res, next){
         .catch(err =>{
             if(err.code === 11000){
                 err = new Error('The username already exists');
-                err.status = 400;
+                err.status = 401;
                 err.reason = 'The username already exists';
             }
             next(err);  

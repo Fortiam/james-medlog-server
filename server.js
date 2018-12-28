@@ -58,6 +58,7 @@ app.use('*', (err, req, res, next)=>{
     const error = err || new Error("Internal system malfunction");
     error.status = err.status || 500;
     error.reason = err.reason || "Unknown Reason";
+    error.message = err.message || 'Message not found';
     res.status(error.status).json({error});
 });//reminder to test this error obj ^^
 
