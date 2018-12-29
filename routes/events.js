@@ -62,24 +62,28 @@ Router.post('/', (req, res, next)=>{
         return next(err);
     }
     //cleared validations -- still need to test for ids belong to userId
-    start = moment(start).add(1, 'm');
     const newEvent = {title, patientId, medId, userId, start /*, end*/};
     let startingTime = start;
-    let beginningOfDay = start;
+    // let beginningOfDay = start;
     let allEvents = [];
     allEvents.push(newEvent);
     return Med.find({"_id": medId, userId})
     .then(medsArray=>{
             let whichMed = medsArray[0];
-            let dosesPerDay = Math.round(24/whichMed.rateAmount);
-            for(let x = 0; x < whichMed.howLongAmount; x++){//loops through 1 pass= 1 day for all the needed days.
-                for(let y = 1; y <= dosesPerDay; y++){
-                    allEvents.push(Object.assign({}, newEvent, {"start" : moment(startingTime).add(whichMed.rateAmount, 'hours')}));
-                    startingTime = moment(startingTime).add(whichMed.rateAmount, 'hours');
-                }
-                beginningOfDay = moment(beginningOfDay).add(1, 'day');
-                startingTime = moment(beginningOfDay);
-            }
+            // let dosesPerDay = Math.round(24/whichMed.rateAmount);
+            // for(let x = 0; x < whichMed.howLongAmount; x++){//loops through 1 pass= 1 day for all the needed days.
+            //     for(let y = 1; y <= dosesPerDay; y++){
+            //         allEvents.push(Object.assign({}, newEvent, {"start" : moment(startingTime).add(whichMed.rateAmount, 'hours').format()}));
+            //         startingTime = moment(startingTime).add(whichMed.rateAmount, 'hours').format();
+            //     }
+            //     beginningOfDay = moment(beginningOfDay).add(1, 'day').format();
+            //     startingTime = moment(beginningOfDay).format();
+            // }
+            let totalNumberOfHours = (whichMed.howLongAmount * 24);
+            for(let i=0; i < totalNumberOfHours; i += whichMed.rateAmount){
+                allEvents.push(Object.assign({}, newEvent, {"start": moment(startingTime).add(whichMed.rateAmount, 'hours').format()}));
+                startingTime = moment(startingTime).add(whichMed.rateAmount, 'hours').format();
+            }//this loop should do the same thing as the commented out one..
         return CalEvent.insertMany(allEvents, {new: true})
         .then((data) => {
             res.json(data);
