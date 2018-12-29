@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const User = require('../models/users');
+const moment = require('moment');
 
 function checkIdIsValid(...testMe){
     let badIds = 0;
@@ -14,7 +15,9 @@ function checkIdIsValid(...testMe){
 function checkString(testMe){
     return(typeof testMe === 'string' && testMe.length > 0);
 }
-
+function checkTime(timeToCheck){
+    return (moment().isValid(timeToCheck));
+}
 function checkArray(testArray){
     let badString = 0;
     testArray.forEach(stringy => (stringy.length > 0)? true: badString++);
@@ -95,4 +98,4 @@ function validEmailAddress(checkMe){
     const EmailRegExp = /^\w+@\w+[.]\w{1,4}$/gi;
     return EmailRegExp.test(checkMe); //gonna be fun testing this in mocha
 }
-module.exports = { checkIdIsValid, checkString, addOnlyValidFields, checkUsernameAndPassword, trimName, checkUserIdExists, boolCheck, validEmailAddress, checkArray, checkNumberAboveZero };
+module.exports = { checkIdIsValid, checkString, addOnlyValidFields, checkUsernameAndPassword, trimName, checkUserIdExists, boolCheck, validEmailAddress, checkArray, checkNumberAboveZero, checkTime };

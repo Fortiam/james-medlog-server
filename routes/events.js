@@ -3,7 +3,9 @@ const Router = express.Router();
 //const mongoose = require('mongoose');
 const passport = require('passport');
 const CalEvent = require('../models/calEvents');
-const { checkIdIsValid, checkString } = require('../utils/validate');
+const { checkIdIsValid, checkString, checkTime } = require('../utils/validate');
+const Med = require('../models/meds');
+const moment = require('moment');
 
 //protected endpoints with jwt
 Router.use('/', passport.authenticate('jwt', {session : false, failWithError: true }));
@@ -43,10 +45,9 @@ Router.get('/:id', (req, res, next)=>{
 });
 //post new event route
 Router.post('/', (req, res, next)=>{
-    let { title, patientId, medId, start, end } = req.body;
+    let { title, patientId, medId, start/*, end*/ } = req.body;
     const userId = req.user.id;
     //validate body ^^
-    //need to add a val check for start& end,**
     if(!checkString(title)){
         title = "Default title for now";//change me later
     }
@@ -55,16 +56,36 @@ Router.post('/', (req, res, next)=>{
         err.status = 400;
         return next(err);
     }
+    if(!checkTime(start)){
+        const err = new Error('Invalid time in request body');
+        err.status = 400;
+        return next(err);
+    }
     //cleared validations -- still need to test for ids belong to userId
+    start = moment(start).add(1, 'm');
     const newEvent = {title, patientId, medId, userId, start /*, end*/};
-    console.log("1", newEvent);
-    return CalEvent.insertMany(newEvent, {new: true})
-    .then((data) => {
-        console.log("2", data);
-        res.json(data[0]);
+    let startingTime = start;
+    let beginningOfDay = start;
+    let allEvents = [];
+    allEvents.push(newEvent);
+    return Med.find({"_id": medId, userId})
+    .then(medsArray=>{
+            let whichMed = medsArray[0];
+            let dosesPerDay = Math.round(24/whichMed.rateAmount);
+            for(let x = 0; x < whichMed.howLongAmount; x++){//loops through 1 pass= 1 day for all the needed days.
+                for(let y = 1; y <= dosesPerDay; y++){
+                    allEvents.push(Object.assign({}, newEvent, {"start" : moment(startingTime).add(whichMed.rateAmount, 'hours')}));
+                    startingTime = moment(startingTime).add(whichMed.rateAmount, 'hours');
+                }
+                beginningOfDay = moment(beginningOfDay).add(1, 'day');
+                startingTime = moment(beginningOfDay);
+            }
+        return CalEvent.insertMany(allEvents, {new: true})
+        .then((data) => {
+            res.json(data);
+        })
     })
     .catch(err=> {
-        console.log("3", err);
         next(err)});
 });
 //put events route
