@@ -118,7 +118,34 @@ Router.put('/:id', (req, res, next)=>{
         .then(data => res.json(data))
         .catch(err => next(err));
 });
-Router.delete('/:id', (req, res, next)=>{
+Router.delete('/future/', (req, res, next)=>{
+    const { medId, patientId } = req.body;
+    //check id
+    const goodId = checkIdIsValid(medId, patientId);
+    if(!goodId) {
+        const err = new Error('invalid medicine in request');
+        err.status = 400;
+        return next(err);
+    }
+    const userId = req.user.id;
+    const stopNow = moment().format();
+    return CalEvent.find({userId, medId, patientId}).select({'start': 1, "_id": 0})
+        .then(theData=>{
+            let results = theData.filter(eachEvent=> moment(eachEvent["start"]).isAfter(stopNow));
+            let results2 = results.map(each=> each.start);
+            CalEvent.deleteMany({userId, medId, patientId, "start" : {$in : results2 }} )
+            .then(()=>{
+                return CalEvent.find({userId})
+                    .then(allEventsForAllTheirMeds=> {
+                        res.json(allEventsForAllTheirMeds)
+                    });
+            })
+        })
+        .catch(err=>{
+            return next(err)});
+});
+
+Router.delete('/one/:id', (req, res, next)=>{
     const id = req.params.id;
     const userId = req.user.id;
     //check id
@@ -139,4 +166,5 @@ Router.delete('/:id', (req, res, next)=>{
         })
         .catch(err=> next(err));
 });
+
 module.exports =  Router ;

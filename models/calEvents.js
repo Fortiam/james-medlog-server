@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const moment = require('moment');
 
 const calEventsSchema = new mongoose.Schema({
     title: String, //they can leave this blank. will have some nifty default thing..
@@ -20,5 +21,7 @@ calEventsSchema.set('toJSON', {
       delete result.__v;
     }
 });
-
+calEventsSchema.virtual('stringToTime').get(function(){
+    return moment(this.start).format();
+});
 module.exports = mongoose.model('CalEvent', calEventsSchema); 
