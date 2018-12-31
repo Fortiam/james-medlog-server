@@ -33,7 +33,6 @@ Router.get('/:id', (req, res, next)=>{
 //create new log
 Router.post('/', (req, res, next)=>{
     const userId = req.user.id;
-    console.log("1--", userId);
     let { comments, medId, patientId,/*, rateInterval, howLongForDays*/ } = req.body;
     const goodStrings = checkString(comments);
     if(!goodStrings){
@@ -52,7 +51,6 @@ Router.post('/', (req, res, next)=>{
     if(goodPatientId){
         newEntry.PatientId = patientId;//also optional
     }
-    console.log("here", newEntry);
     return Log.create(newEntry)
         .then(data=>res.json(data))
         .catch(err=>next(err));
