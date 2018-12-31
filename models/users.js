@@ -7,7 +7,7 @@ const usersSchema = new mongoose.Schema({
     username : {type : String, required : true, unique : true},
     email : String,
     password : {type : String, required: true},
-    useEmailForApi : {type : Boolean, default : false}
+    useEmailForApi : {type : Boolean, default : false},
 });
 // useEmailForApi they should have to choose to turn this 
 // feature on 

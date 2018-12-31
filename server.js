@@ -12,6 +12,7 @@ const usersRoutes = require('./routes/users');
 const patientsRoutes = require('./routes/patients');
 const medsRoutes = require('./routes/meds');
 const eventRoutes = require('./routes/events');
+const logsRoutes = require('./routes/logs');
 
 mongoose.Promise = global.Promise;
 mongoose.set('useNewUrlParser', true);
@@ -47,7 +48,7 @@ app.use('/api/users', usersRoutes); // for /api/users/update/:id to edit account
 app.use('/api/patients', patientsRoutes);//family members and pets
 app.use('/api/meds', medsRoutes);
 app.use('/api/events', eventRoutes);
-
+app.use('/api/logs', logsRoutes);
 //catch-all route:
 app.use('*', (req, res, next) => {
     return res.status(404).json({ message: 'Not Found' });

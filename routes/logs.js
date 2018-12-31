@@ -3,18 +3,20 @@ const Router = express.Router();
 const passport = require('passport');
 const Med = require('../models/meds');
 const User = require('../models/users');
+const Patient = require('../models/patients');
 const Log = require('../models/logs');
+
 const { checkIdIsValid, checkArray, checkNumberAboveZero, checkString } = require('../utils/validate');
 //protected endpoints with jwt
 Router.use('/', passport.authenticate('jwt', {session : false, failWithError: true }));
-//get all meds route
+//get all logs route
 Router.get('/', (req, res, next)=>{
     const userId = req.user.id;
-    return Med.find({"userId": userId})
+    return Log.find({"userId": userId})
         .then(data => res.json(data))
         .catch(err=>next(err));
 });
-//get a med
+//get a log
 Router.get('/:id', (req, res, next)=>{
     const { id } = req.params;
     const goodId = checkIdIsValid(id);
@@ -24,32 +26,38 @@ Router.get('/:id', (req, res, next)=>{
         return next(err);
     }
     const userId = req.user.id;
-    return Med.find({"_id": id, "userId": userId})
+    return Log.find({"_id": id, "userId": userId})
         .then(data => res.json(data))
         .catch(err=>next(err));
 });
-//create new med
+//create new log
 Router.post('/', (req, res, next)=>{
     const userId = req.user.id;
-    let { name, dosage, rateAmount,  howLongAmount/*, rateInterval, howLongForDays*/ } = req.body;
-    const goodStrings = checkArray([name, dosage, /*rateInterval, howLongForDays*/]);
+    console.log("1--", userId);
+    let { comments, medId, patientId,/*, rateInterval, howLongForDays*/ } = req.body;
+    const goodStrings = checkString(comments);
     if(!goodStrings){
         const err = new Error("Missing data in request body");
         err.status = 400;
         return next(err);
     }
-    if(!checkNumberAboveZero(rateAmount)|| !checkNumberAboveZero(howLongAmount)){
-        const err = new Error("Bad dosage amount in request body");
-        err.status = 400;
-        return next(err);
+
+    const newEntry = Object.assign({}, {userId, "comments" : [{"comment": comments}]})
+    const goodMedId = checkIdIsValid(medId);
+    const goodPatientId = checkIdIsValid(patientId);
+    
+    if(goodMedId){
+        newEntry.medId = medId;//optional 
     }
-    rateAmount = Number(rateAmount);
-    howLongAmount = Number(howLongAmount);
-    return Med.create({userId, name, dosage, rateAmount, howLongAmount,/* rateInterval, howLongForDays*/})
+    if(goodPatientId){
+        newEntry.PatientId = patientId;//also optional
+    }
+    console.log("here", newEntry);
+    return Log.create(newEntry)
         .then(data=>res.json(data))
         .catch(err=>next(err));
 });
-//update a med
+//update a log
 Router.put('/:id', (req, res, next)=>{
     const {id} = req.params;
     const goodId = checkIdIsValid(id);
@@ -59,25 +67,27 @@ Router.put('/:id', (req, res, next)=>{
         return next(err);
     }
     const userId = req.user.id;
-    let { name, dosage, rateAmount, howLongAmount, /*rateInterval,  howLongForDays */} = req.body;
-    const updateObj = {};
-    if(checkNumberAboveZero(rateAmount)){
-        updateObj['rateAmount'] = Number(rateAmount);
+    let { medId, patientId, comment } = req.body;
+    //validate user input
+    //"comments": [{"comment": comment}]
+    const goodMedId = checkIdIsValid(medId);
+    const goodPatientId = checkIdIsValid(patientId);
+    const updateLog = Object.assign({}, {userId});
+    const goodString = checkString(comment);
+    if(goodString){
+        updateLog.comments = [{"comment" : comment}];
     }
-    if(checkNumberAboveZero(howLongAmount)){
-        updateObj['howLongAmount'] = Number(howLongAmount);
+    if(goodMedId){
+        updateLog.medId = medId;//optional 
     }
-    if(checkString(name)){
-        updateObj['name'] = name;
+    if(goodPatientId){
+        updateLog.patientId = patientId;//also optional
     }
-    if(checkString(dosage)){
-        updateObj['dosage'] = dosage;
-    }
-    return Med.findOneAndUpdate({userId, "_id": id} , updateObj, {$set: true, new: true})
+    return Log.findOneAndUpdate({userId, "_id": id} , updateLog, {$set: true, new: true})
         .then(data=>res.json(data))
         .catch(err=>next(err));
 });
-//remove a med
+//remove a log
 Router.delete('/:id', (req, res, next)=>{
     const {id} = req.params;
     const goodId = checkIdIsValid(id);
@@ -87,12 +97,9 @@ Router.delete('/:id', (req, res, next)=>{
         return next(err);
     }
     const userId = req.user.id;
-    return Promise.all([
-        Med.findOneAndRemove({"_id": id, "userId": userId}),
-        Log.deleteMany({userId, "medId": id})
-     ])
+    return Log.findOneAndRemove({"_id": id, "userId": userId})
         .then(()=>{
-            return Med.find({"userId" : userId})
+            return Log.find({"userId" : userId})
                 .then(data=>res.json(data))
                 .catch(err=>next(err));
         })

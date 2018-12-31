@@ -3,6 +3,7 @@ const Router = express.Router();
 const passport = require('passport');
 const Patient = require('../models/patients');
 const CalEvent = require('../models/calEvents');
+const Log = require('../models/logs');
 //const mongoose = require('mongoose');
 const { checkIdIsValid, checkString, trimName, addOnlyValidFields } = require('../utils/validate');
 
@@ -147,7 +148,11 @@ Router.delete('/:id', (req, res, next)=>{
         return next(err);
     }
     const userId = req.user.id;
-    return Promise.all([Patient.findOneAndRemove({"_id": id, "userId": userId}), CalEvent.deleteMany({"userId": userId, "patientId": id})])
+    return Promise.all([
+        Patient.findOneAndRemove({"_id": id, "userId": userId}),
+        CalEvent.deleteMany({"userId": userId, "patientId": id}),
+        Log.deleteMany({userId, "patientId": id})
+        ])
         .then(()=>{
             return Patient.find({"userId": userId})
         })

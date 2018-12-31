@@ -6,6 +6,7 @@ const User = require('../models/users');
 const Patient = require('../models/patients');
 const Med = require('../models/meds');
 const CalEvent = require('../models/calEvents');
+const Log = require('../models/logs');
 
 //protected endpoints with jwt
 Router.use('/', passport.authenticate('jwt', {session : false, failWithError: true }));
@@ -65,7 +66,8 @@ Router.delete('/deleteMe/:id', function(req, res, next){
    Promise.all([User.findOneAndRemove({"_id": userId}),
         Med.deleteMany({"userId": userId}),
         Patient.deleteMany({"userId": userId}),
-        CalEvent.deleteMany({"userId": userId})
+        CalEvent.deleteMany({"userId": userId}),
+        Log.deleteMany({userId})
         ])
         .then(()=>res.sendStatus(204))
         .catch(err=>next(err));
