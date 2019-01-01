@@ -43,6 +43,27 @@ Router.get('/:id', (req, res, next)=>{
     })
     .catch(err=> next(err));
 });
+//list all events filtered by person or med 
+Router.post('/filter', (req, res, next)=>{
+    const userId = req.user.id;
+    let { patientId, medId } = req.body;
+    let filter = Object.assign({ userId });
+    let goodPatient = checkIdIsValid(patientId);
+    let goodMed = checkIdIsValid(medId);
+    if (goodPatient){
+        filter["patientId"] = patientId;
+    }
+    if (goodMed){
+        filter["medId"] = medId;
+    }
+    return CalEvent.find(filter)
+    .then((response)=>{
+        res.json(response);
+    })
+    .catch(error=>{
+        return next(error);
+    });
+});
 //post new event route
 Router.post('/', (req, res, next)=>{
     let { title, patientId, medId, start/*, end*/ } = req.body;
