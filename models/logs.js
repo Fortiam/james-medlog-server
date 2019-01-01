@@ -4,7 +4,7 @@ const logsSchema = new mongoose.Schema({
     userId : {type: mongoose.Schema.Types.ObjectId, ref: 'User', required : true},
     medId : {type: mongoose.Schema.Types.ObjectId, ref: 'Med'},
     patientId : {type: mongoose.Schema.Types.ObjectId, ref: 'Patient'},
-    comments : [{comment : String}]
+    comment : String
 });
 
 logsSchema.set('toJSON', {

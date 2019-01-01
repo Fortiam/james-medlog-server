@@ -33,15 +33,15 @@ Router.get('/:id', (req, res, next)=>{
 //create new log
 Router.post('/', (req, res, next)=>{
     const userId = req.user.id;
-    let { comments, medId, patientId,/*, rateInterval, howLongForDays*/ } = req.body;
-    const goodStrings = checkString(comments);
+    let { comment, medId, patientId,/*, rateInterval, howLongForDays*/ } = req.body;
+    const goodStrings = checkString(comment);
     if(!goodStrings){
         const err = new Error("Missing data in request body");
         err.status = 400;
         return next(err);
     }
 
-    const newEntry = Object.assign({}, {userId, "comments" : [{"comment": comments}]})
+    const newEntry = Object.assign({}, {userId, "comment": comment})
     const goodMedId = checkIdIsValid(medId);
     const goodPatientId = checkIdIsValid(patientId);
     
@@ -73,7 +73,7 @@ Router.put('/:id', (req, res, next)=>{
     const updateLog = Object.assign({}, {userId});
     const goodString = checkString(comment);
     if(goodString){
-        updateLog.comments = [{"comment" : comment}];
+        updateLog["comment"] = comment;
     }
     if(goodMedId){
         updateLog.medId = medId;//optional 
