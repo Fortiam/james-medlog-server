@@ -30,6 +30,27 @@ Router.get('/:id', (req, res, next)=>{
         .then(data => res.json(data))
         .catch(err=>next(err));
 });
+//get filtered route, and _post_ so id's aren't sent in url
+Router.post('/filter', (req, res, next)=>{
+    const userId = req.user.id;
+    let { patientId, medId } = req.body;
+    let filter = Object.assign({ userId });
+    let goodPatient = checkIdIsValid(patientId);
+    let goodMed = checkIdIsValid(medId);
+    if (goodPatient){
+        filter["patientId"] = patientId;
+    }
+    if (goodMed){
+        filter["medId"] = medId;
+    }
+    return Log.find(filter)
+    .then((response)=>{
+        res.json(response);
+    })
+    .catch(error=>{
+        return next(error);
+    });
+});
 //create new log
 Router.post('/', (req, res, next)=>{
     const userId = req.user.id;
@@ -65,7 +86,7 @@ Router.put('/:id', (req, res, next)=>{
         return next(err);
     }
     const userId = req.user.id;
-    let { medId, patientId, comment } = req.body;
+    let { medId, patientId, comment, removeMedId, removePatientId } = req.body;
     //validate user input
     //"comments": [{"comment": comment}]
     const goodMedId = checkIdIsValid(medId);
@@ -77,9 +98,14 @@ Router.put('/:id', (req, res, next)=>{
     }
     if(goodMedId){
         updateLog.medId = medId;//optional 
+    } else if(removeMedId){
+        updateLog.$unset = {'medId': true};
     }
     if(goodPatientId){
         updateLog.patientId = patientId;//also optional
+    } else if(removePatientId){
+        const newObject = Object.assign({}, updateLog.$unset, {'patientId': true});
+        updateLog.$unset = newObject;
     }
     return Log.findOneAndUpdate({userId, "_id": id} , updateLog, {$set: true, new: true})
         .then(data=>res.json(data))
