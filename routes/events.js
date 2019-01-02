@@ -3,8 +3,9 @@ const Router = express.Router();
 //const mongoose = require('mongoose');
 const passport = require('passport');
 const CalEvent = require('../models/calEvents');
-const { checkIdIsValid, checkString, checkTime } = require('../utils/validate');
+const { checkIdIsValid, checkString, checkTime, checkNumberAboveZero } = require('../utils/validate');
 const Med = require('../models/meds');
+const Patient = require('../models/patients');
 const moment = require('moment');
 
 //protected endpoints with jwt
@@ -113,6 +114,64 @@ Router.post('/', (req, res, next)=>{
     .catch(err=> {
         next(err)});
 });
+//change all events for a med, when a med rate is updated
+Router.put('/', (req, res, next)=>{
+    const userId = req.user.id;
+    let { medId, rateAmount, howLongAmount } = req.body;
+    const goodId = checkIdIsValid(medId);
+    if(!goodId) {
+        const err = new Error('invalid medicine in request');
+        err.status = 400;
+        return next(err);
+    }
+    if(!checkNumberAboveZero(rateAmount) || !checkNumberAboveZero(howLongAmount)){
+        const err = new Error('invalid number value in request');
+        err.status = 400;
+        return next(err);
+    }
+    const stopNow = moment().format();
+    //return 
+    return Promise.all([CalEvent.find({userId, medId }).sort('start'), Patient.find({userId})])// .sort on events start time here, maybe also sort on patients
+        .then(doubleData=>{
+            let oldEvents = doubleData[0];
+            let persons = doubleData[1];
+            let eventsToAlter = oldEvents.filter(eachOldie=> moment(eachOldie["start"]).isAfter(stopNow));
+            let preFilter = [];
+            let firstEventPerPerson =[];
+            for(let i=0; i < persons.length; i++){
+                //here we loop once through all the family
+                const anEventVar = eventsToAlter.find((eventSingle)=>{
+                    return eventSingle["patientId"].toString()===persons[i]["_id"].toString();});
+                     preFilter.push(anEventVar);
+            }
+            preFilter.forEach(each=> each?firstEventPerPerson.push(each):false);
+
+            let newUpdatesEvents = [];
+            let allEventsPerPerson = [];
+            let startingTime = moment().format();
+            let newEvent = {userId, medId /*need title and patientId */}; 
+            let totalNumberOfHours = (howLongAmount * 24);
+            for(let j=0; j < firstEventPerPerson.length;j++){
+                //here we loop thru firstE and repopulate new events based off medId times,, which are now newly updated already
+                for(let k=0; k < totalNumberOfHours; k += rateAmount){
+                    //here we add to the  _final event obdate object_
+                    allEventsPerPerson.push(Object.assign({}, newEvent, {"start": moment(startingTime).add(rateAmount, 'hours').format(), "patientId": firstEventPerPerson[j].patientId, title: "Updated Event!"}));
+                    startingTime = moment(startingTime).add(rateAmount, 'hours').format();
+                }
+                //here we create the _final array out of _final objects^
+            newUpdatesEvents.push(...allEventsPerPerson);
+            }
+            const delEvents = eventsToAlter.map(each=> each["start"]);
+            CalEvent.deleteMany({ userId, medId, "start" : {$in : delEvents }}).then(()=>{
+                 CalEvent.insertMany(newUpdatesEvents, {new: true})
+                 .then(()=>CalEvent.find({userId}))
+                    .then(finalData=> res.json(finalData))
+            })
+        })
+        .catch(err=>{
+            next(err)});
+});
+
 //put events route
 Router.put('/:id', (req, res, next)=>{
     let { title, patientId, medId } = req.body;
@@ -139,6 +198,7 @@ Router.put('/:id', (req, res, next)=>{
         .then(data => res.json(data))
         .catch(err => next(err));
 });
+
 Router.delete('/future/', (req, res, next)=>{
     const { medId, patientId } = req.body;
     //check id
