@@ -23,6 +23,19 @@ function checkArray(testArray){
     testArray.forEach(stringy => (stringy.length > 0)? true: badString++);
     return (badString === 0);
 }
+function checkArrayOfObjects(testArray){
+    if(Array.isArray(testArray)){
+        if(testArray.length > 0){
+            let onlyIds = testArray.map(each=> each._id);
+            if(testArray[0].name && checkIdIsValid(onlyIds)){//might need to be [...onlyIds]
+                return true;
+            }
+        } else if(testArray.length === 0){
+            return true;
+        }
+    }
+    return false;
+}
 function checkNumberAboveZero(checkMe){
     return (!isNaN(Number(checkMe))&& typeof(Number(checkMe))==='number' && (Number(checkMe) > 0));
 }
@@ -98,4 +111,4 @@ function validEmailAddress(checkMe){
     const EmailRegExp = /^\w+@\w+[.]\w{1,4}$/gi;
     return EmailRegExp.test(checkMe); //gonna be fun testing this in mocha
 }
-module.exports = { checkIdIsValid, checkString, addOnlyValidFields, checkUsernameAndPassword, trimName, checkUserIdExists, boolCheck, validEmailAddress, checkArray, checkNumberAboveZero, checkTime };
+module.exports = { checkIdIsValid, checkString, addOnlyValidFields, checkUsernameAndPassword, trimName, checkUserIdExists, boolCheck, validEmailAddress, checkArray, checkArrayOfObjects, checkNumberAboveZero, checkTime };

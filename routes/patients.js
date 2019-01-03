@@ -5,7 +5,7 @@ const Patient = require('../models/patients');
 const CalEvent = require('../models/calEvents');
 const Log = require('../models/logs');
 //const mongoose = require('mongoose');
-const { checkIdIsValid, checkString, trimName, addOnlyValidFields } = require('../utils/validate');
+const { checkIdIsValid, checkString, trimName, addOnlyValidFields, checkArrayOfObjects } = require('../utils/validate');
 
 //   ***  all these endpoints are path off of: '/api/patients'  ***
 //protected endpoints with jwt
@@ -83,7 +83,7 @@ Router.put('/:id', (req, res, next)=>{
         return next(err);
     }
     const userId = req.user.id;
-    let { name, age, gender, height, weight, allergies } = req.body;
+    let { name, age, gender, height, weight, allergies, medToRemove } = req.body;
     let doctorName = null;
     let doctorContact = null;
     if(req.body.doctor){
@@ -103,9 +103,15 @@ Router.put('/:id', (req, res, next)=>{
         }
         name = trimName(name);
     }
+    
     const optionalFields = ["name", "age", "gender", "height", "weight", "allergies"];
     const checkFields = [name, age, gender, height, weight, allergies];
     const newPatientObject = addOnlyValidFields(optionalFields, checkFields, userId);
+    if(checkIdIsValid(medToRemove)){
+        //validated the id
+        newPatientObject.$pull = { "medsCurrentlyOn" : {"_id" : medToRemove}};
+    }
+    
     newPatientObject.doctor = [{}];
     if(doctorName!= null){
         newPatientObject.doctor[0].name = doctorName;

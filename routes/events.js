@@ -106,9 +106,13 @@ Router.post('/', (req, res, next)=>{
                 allEvents.push(Object.assign({}, newEvent, {"start": moment(startingTime).add(whichMed.rateAmount, 'hours').format()}));
                 startingTime = moment(startingTime).add(whichMed.rateAmount, 'hours').format();
             }//this loop should do the same thing as the commented out one..
-        return CalEvent.insertMany(allEvents, {new: true})
+        return Promise.all([CalEvent.insertMany(allEvents, {new: true}),
+            Patient.findByIdAndUpdate(patientId, {$addToSet : {"medsCurrentlyOn": medsArray[0]}}, {$set: true, new: true})
+        ])
         .then((data) => {
-            res.json(data);
+            //send back multiple arrays for client
+            const twoFor = Object.assign({}, {"eventsData": data[0], "patientData": data[1]});
+            res.json(twoFor);
         })
     })
     .catch(err=> {

@@ -4,6 +4,9 @@ const passport = require('passport');
 const Med = require('../models/meds');
 const User = require('../models/users');
 const Log = require('../models/logs');
+const Patient = require('../models/patients');
+const CalEvent = require('../models/calEvents');
+const moment = require('moment');
 const { checkIdIsValid, checkArray, checkNumberAboveZero, checkString } = require('../utils/validate');
 //protected endpoints with jwt
 Router.use('/', passport.authenticate('jwt', {session : false, failWithError: true }));
@@ -87,9 +90,12 @@ Router.delete('/:id', (req, res, next)=>{
         return next(err);
     }
     const userId = req.user.id;
+    const keepPastEventsForRecord = moment().format();
     return Promise.all([
         Med.findOneAndRemove({"_id": id, "userId": userId}),
-        Log.deleteMany({userId, "medId": id})
+        Log.deleteMany({userId, "medId": id}),
+        CalEvent.deleteMany({userId, "medId": id, "start": {$gt: keepPastEventsForRecord}}),
+        Patient.updateMany({userId}, {$pull : {"medsCurrentlyOn" : {"_id" : id }}})
      ])
         .then(()=>{
             return Med.find({"userId" : userId})
