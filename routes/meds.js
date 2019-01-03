@@ -77,7 +77,15 @@ Router.put('/:id', (req, res, next)=>{
         updateObj['dosage'] = dosage;
     }
     return Med.findOneAndUpdate({userId, "_id": id} , updateObj, {$set: true, new: true})
-        .then(data=>res.json(data))
+        .then(data=>{
+            let scopeData = data;
+            if(updateObj['name']){
+                Patient.updateMany({userId, 'medsCurrentlyOn._id': {$in: id}}, {$set : {'medsCurrentlyOn.$.name' : name }})
+                   .then(()=>res.json(scopeData))
+            } else {
+                return res.json(data);
+            }
+        })
         .catch(err=>next(err));
 });
 //remove a med
