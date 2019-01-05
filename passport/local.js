@@ -1,9 +1,9 @@
 const { Strategy: LocalStrategy } = require('passport-local');
 const User = require('../models/users');
 
-const localStrategy = new LocalStrategy((theUser, thePassword, done)=>{
+const localStrategy = new LocalStrategy((username, password, done)=>{
     let user;
-    return User.findOne({"username": theUser})
+    return User.findOne({"username": username})
     .then(result => {
         user = result;
         if(!user){
@@ -14,7 +14,7 @@ const localStrategy = new LocalStrategy((theUser, thePassword, done)=>{
                 status : 444
             });
         }
-        return user.validatePassword(thePassword);
+        return user.validatePassword(password);
     })
     .then(isValid => {
         if(!isValid){
