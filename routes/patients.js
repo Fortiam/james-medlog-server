@@ -59,7 +59,7 @@ Router.post('/', (req, res, next)=>{
     const newPatientObject = addOnlyValidFields(optionalFields, checkFields, userId);
     newPatientObject["name"] = name;
     if(!doctor){
-        newPatientObject.doctor = [{"name": "no doctor listed", "contact": "not listed"}];
+        newPatientObject.doctor = {"name": "no doctor listed", "contact": "not listed"};
     }
     //now all the fields that have something should be in newPatientObject
     return Patient.create(newPatientObject)
@@ -83,16 +83,14 @@ Router.put('/:id', (req, res, next)=>{
         return next(err);
     }
     const userId = req.user.id;
-    let { name, age, gender, height, weight, allergies, medToRemove } = req.body;
+    let { name, age, gender, height, weight, allergies, medToRemove, doctor } = req.body;
     let doctorName = null;
     let doctorContact = null;
-    if(req.body.doctor){
-        if(req.body.doctor[0].name){
-            doctorName = req.body.doctor[0].name;
-        }
-        if(req.body.doctor[0].contact){
-            doctorContact = req.body.doctor[0].contact;
-        }
+    if(doctor.hasOwnProperty('name')){
+        doctorName = doctor.name;
+    }
+    if(doctor.hasOwnProperty('contact')){
+            doctorContact = req.body.doctor.contact;
     }
     if(name){
         const goodName = checkString(name);
@@ -112,22 +110,14 @@ Router.put('/:id', (req, res, next)=>{
         newPatientObject.$pull = { "medsCurrentlyOn" : {"_id" : medToRemove}};
     }
     
-    newPatientObject.doctor = [{}];
+    newPatientObject.doctor = {};
     if(doctorName!= null){
-        newPatientObject.doctor[0].name = doctorName;
+        newPatientObject.doctor.name = doctorName;
     }
     if(doctorContact != null){
-        newPatientObject.doctor[0].contact = doctorContact;
+        newPatientObject.doctor.contact = doctorContact;
     }
-    return Patient.find({"_id": id, "userId": userId})
-        .then(result=>{
-           if(doctorName === null){
-                newPatientObject.doctor[0].name = result[0].doctor[0].name;
-            }
-            if (doctorContact === null){
-                newPatientObject.doctor[0].contact = result[0].doctor[0].contact;
-            }
-            return Patient.findOneAndUpdate({"_id": id, "userId": userId}, newPatientObject, {$set: true, new: true})
+    return Patient.findOneAndUpdate({"_id": id, "userId": userId}, newPatientObject, {$set: true, new: true})
             .then(data=> {
                 if(data){
                 res.json(data)
@@ -138,10 +128,7 @@ Router.put('/:id', (req, res, next)=>{
                     return next(err);
                 }
             })
-            .catch(err=>{
-                next(err)});
-        })
-        .catch(err=>next(err));
+            .catch(err=>next(err));
 });
 //delete a patient (sad) route
 Router.delete('/:id', (req, res, next)=>{

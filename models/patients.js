@@ -8,7 +8,7 @@ const patientsSchema = new mongoose.Schema({
     height : String,
     allergies : String,
     weight : String,
-    doctor : [{name : String, contact: String}],
+    doctor : {name : String, contact: String},
     medsCurrentlyOn : [{
         name : {type : mongoose.Schema.Types.String, ref: 'Med'},
         medId : {type: mongoose.Schema.Types.ObjectId, ref: 'Med'},
