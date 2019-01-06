@@ -84,8 +84,6 @@ Router.put('/:id', (req, res, next)=>{
     }
     const userId = req.user.id;
     let { name, age, gender, height, weight, allergies, medToRemove } = req.body;
-    // let doctorName = null;
-    // let doctorContact = null;
     let doctor = {};
     if(typeof req.body.doctor === 'object'){
         if(req.body.doctor.hasOwnProperty('name')){
@@ -124,8 +122,18 @@ Router.put('/:id', (req, res, next)=>{
         delete newPatientObject.doctor.contact;
     }
     }
-    //console.log("here before update", newPatientObject);
-    return Patient.findOneAndUpdate({"_id": id, "userId": userId}, newPatientObject, {$set: true, new: true})
+    return Patient.find({"_id":id, "userId": userId})
+    .then(([oldDataBeforeUpdate, ...otherData])=> {
+        let fixDoctorBug = Object.assign({}, newPatientObject);
+        if(newPatientObject.doctor){
+            if(!newPatientObject.doctor.name){
+                fixDoctorBug.doctor.name = oldDataBeforeUpdate.doctor.name;
+            }
+            if(!newPatientObject.doctor.contact){
+                fixDoctorBug.doctor.contact = oldDataBeforeUpdate.doctor.contact;
+            }
+        }
+        return Patient.findOneAndUpdate({"_id": id, "userId": userId}, fixDoctorBug, {$set: true, new: true})
             .then(data=> {
                 if(data){
                 res.json(data)
@@ -136,7 +144,8 @@ Router.put('/:id', (req, res, next)=>{
                     return next(err);
                 }
             })
-            .catch(err=>next(err));
+    })
+    .catch(err=>next(err));
 });
 //delete a patient (sad) route
 Router.delete('/:id', (req, res, next)=>{
