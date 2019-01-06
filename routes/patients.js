@@ -5,7 +5,7 @@ const Patient = require('../models/patients');
 const CalEvent = require('../models/calEvents');
 const Log = require('../models/logs');
 //const mongoose = require('mongoose');
-const { checkIdIsValid, checkString, trimName, addOnlyValidFields, checkArrayOfObjects } = require('../utils/validate');
+const { checkIdIsValid, checkString, trimName, addOnlyValidFields, checkNumberAboveZero } = require('../utils/validate');
 
 //   ***  all these endpoints are path off of: '/api/patients'  ***
 //protected endpoints with jwt
@@ -50,16 +50,16 @@ Router.post('/', (req, res, next)=>{
         return next(err);
     }
     name = trimName(name);
-    const optionalFields = ["age", "gender", "height", "weight", "allergies", "doctor"];
-    const checkFields = [age, gender, height, weight, allergies, doctor];
+    const optionalFields = ["gender", "height", "weight", "allergies", "doctor"];
+    const checkFields = [gender, height, weight, allergies, doctor];
     //doctor is an object of name and email sub-fields..
-    //allergies is an array of strings so we'll handle that logic seperate?
-    //we'll come back to ^that after seeing if this logic even works..
-    //also reminder we need to kick the habit of using the royal we in comments
     const newPatientObject = addOnlyValidFields(optionalFields, checkFields, userId);
     newPatientObject["name"] = name;
     if(!doctor){
         newPatientObject.doctor = {"name": "no doctor listed", "contact": "not listed"};
+    }
+    if(checkNumberAboveZero(age)){
+        newPatientObject["age"] = age;
     }
     //now all the fields that have something should be in newPatientObject
     return Patient.create(newPatientObject)
@@ -83,14 +83,17 @@ Router.put('/:id', (req, res, next)=>{
         return next(err);
     }
     const userId = req.user.id;
-    let { name, age, gender, height, weight, allergies, medToRemove, doctor } = req.body;
-    let doctorName = null;
-    let doctorContact = null;
-    if(doctor.hasOwnProperty('name')){
-        doctorName = doctor.name;
-    }
-    if(doctor.hasOwnProperty('contact')){
-            doctorContact = req.body.doctor.contact;
+    let { name, age, gender, height, weight, allergies, medToRemove } = req.body;
+    // let doctorName = null;
+    // let doctorContact = null;
+    let doctor = {};
+    if(typeof req.body.doctor === 'object'){
+        if(req.body.doctor.hasOwnProperty('name')){
+            doctor.name = req.body.doctor.name;
+        }
+        if(req.body.doctor.hasOwnProperty('contact')){
+            doctor.contact = req.body.doctor.contact;
+        }
     }
     if(name){
         const goodName = checkString(name);
@@ -101,22 +104,27 @@ Router.put('/:id', (req, res, next)=>{
         }
         name = trimName(name);
     }
-    
-    const optionalFields = ["name", "age", "gender", "height", "weight", "allergies"];
-    const checkFields = [name, age, gender, height, weight, allergies];
+    const optionalFields = ["name", "gender", "height", "weight", "allergies"];
+    const checkFields = [name, gender, height, weight, allergies];
     const newPatientObject = addOnlyValidFields(optionalFields, checkFields, userId);
+    if(checkNumberAboveZero(age)){
+        newPatientObject["age"] = age;
+    }
     if(checkIdIsValid(medToRemove)){
         //validated the id
         newPatientObject.$pull = { "medsCurrentlyOn" : {"_id" : medToRemove}};
     }
-    
-    newPatientObject.doctor = {};
-    if(doctorName!= null){
-        newPatientObject.doctor.name = doctorName;
+    if(req.body.doctor){
+    newPatientObject.doctor = Object.assign({}, doctor);
+    if(newPatientObject.doctor!== undefined&& newPatientObject.doctor.name===null){
+        delete newPatientObject.doctor.name;
+        
     }
-    if(doctorContact != null){
-        newPatientObject.doctor.contact = doctorContact;
+    if(newPatientObject.doctor!==undefined && newPatientObject.doctor.contact===null){
+        delete newPatientObject.doctor.contact;
     }
+    }
+    //console.log("here before update", newPatientObject);
     return Patient.findOneAndUpdate({"_id": id, "userId": userId}, newPatientObject, {$set: true, new: true})
             .then(data=> {
                 if(data){
