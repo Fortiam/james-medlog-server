@@ -12,12 +12,12 @@ const Log = require('../models/logs');
 Router.use('/', passport.authenticate('jwt', {session : false, failWithError: true }));
 //edit and update user account
 
-Router.put('/update/:id', function(req, res, next){
+Router.put('/:id', function(req, res, next){
     const id = req.params.id;
     const userId = req.user.id;
     if(!checkIdIsValid(id)|| !checkIdIsValid(userId)){
         const err = new Error('Invalid id in request body');
-        err.status = 400;
+        err.status = 401;
         return next(err);
     }
     let { firstName, lastName, email, useEmailForApi, /*username, password*/ } = req.body;
@@ -54,12 +54,12 @@ Router.put('/update/:id', function(req, res, next){
 });
 
 //delete user self
-Router.delete('/deleteMe/:id', function(req, res, next){
+Router.delete('/:id', function(req, res, next){
     const id = req.params.id;
     const userId = req.user.id;
     if(!checkIdIsValid(id)|| !checkIdIsValid(userId)){
         const err = new Error('Invalid id in request body');
-        err.status = 400;
+        err.status = 401;
         return next(err);
     }
     //remove all the user owned: patients, meds, events, and the user too
