@@ -4,10 +4,8 @@ const passport = require('passport');
 const Patient = require('../models/patients');
 const CalEvent = require('../models/calEvents');
 const Log = require('../models/logs');
-//const mongoose = require('mongoose');
 const { checkIdIsValid, checkString, trimName, addOnlyValidFields, checkNumberAboveZero } = require('../utils/validate');
 
-//   ***  all these endpoints are path off of: '/api/patients'  ***
 //protected endpoints with jwt
 Router.use('/', passport.authenticate('jwt', {session : false, failWithError: true }));
 //get all patients route
@@ -41,7 +39,6 @@ Router.get('/:id', (req, res, next)=>{
 Router.post('/', (req, res, next)=>{
     const userId = req.user.id;
     let { name, age, gender, height, weight, allergies, doctor } = req.body;
-    //let { name : doctorName, contact : doctorContact} = req.body.doctor;
     //name is technically the only required field
     const goodName = checkString(name);
     if(!goodName){
@@ -52,7 +49,7 @@ Router.post('/', (req, res, next)=>{
     name = trimName(name);
     const optionalFields = ["gender", "height", "weight", "allergies", "doctor"];
     const checkFields = [gender, height, weight, allergies, doctor];
-    //doctor is an object of name and email sub-fields..
+    //doctor is an object of name and contact fields..
     const newPatientObject = addOnlyValidFields(optionalFields, checkFields, userId);
     newPatientObject["name"] = name;
     if(!doctor){
@@ -69,7 +66,7 @@ Router.post('/', (req, res, next)=>{
                 err = new Error('The Patient name already exists');
                 err.status = 400;
                 err.reason = 'The Patient name already exists';
-            }//should never get this ^, name is not a unique schema field
+            }
             next(err);
         });
 });

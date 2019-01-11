@@ -20,12 +20,13 @@ usersSchema.set('toJSON', {
     }
 });
 
-// usersSchema.methods.serialize = function(){
-//     return { username : this.username,
-//             // firstName : this.firstName,
-//             // lastName: this.lastName,
-//     };
-// };
+usersSchema.methods.serialize = function(){
+    return { username : this.username,
+             firstName : this.firstName,
+             lastName: this.lastName,
+             email : this.email
+    };
+};
 
 usersSchema.methods.validatePassword = function(AttemptedPassword){
     return bcrypt.compare(AttemptedPassword, this.password);

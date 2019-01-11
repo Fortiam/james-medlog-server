@@ -15,8 +15,8 @@ const patientsSchema = new mongoose.Schema({
         //start : String
     }]
 });
-//we don't math height, it's just for the records, a string is fine
-
+//we don't math height, it's just for the records,
+//we should change age to birthdate, more useful
 patientsSchema.set('toJSON', {
     virtuals: true,     // include built-in virtual `id`
     transform: (doc, result) => {

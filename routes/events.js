@@ -1,6 +1,5 @@
 const express = require('express');
 const Router = express.Router();
-//const mongoose = require('mongoose');
 const passport = require('passport');
 const CalEvent = require('../models/calEvents');
 const { checkIdIsValid, checkString, checkTime, checkNumberAboveZero } = require('../utils/validate');
@@ -69,9 +68,9 @@ Router.post('/filter', (req, res, next)=>{
 Router.post('/', (req, res, next)=>{
     let { title, patientId, medId, start/*, end*/ } = req.body;
     const userId = req.user.id;
-    //validate body ^^
+    //validate body
     if(!checkString(title)){
-        title = "Default title for now";//change me later
+        title = "Default title";
     }
     if(!checkIdIsValid(patientId, medId, userId)){
         const err = new Error('Invalid id in request body');
@@ -86,26 +85,16 @@ Router.post('/', (req, res, next)=>{
     //cleared validations -- still need to test for ids belong to userId
     const newEvent = {title, patientId, medId, userId, start /*, end*/};
     let startingTime = start;
-    // let beginningOfDay = start;
     let allEvents = [];
     allEvents.push(newEvent);
     return Med.find({"_id": medId, userId})
     .then(medsArray=>{
             let whichMed = medsArray[0];
-            // let dosesPerDay = Math.round(24/whichMed.rateAmount);
-            // for(let x = 0; x < whichMed.howLongAmount; x++){//loops through 1 pass= 1 day for all the needed days.
-            //     for(let y = 1; y <= dosesPerDay; y++){
-            //         allEvents.push(Object.assign({}, newEvent, {"start" : moment(startingTime).add(whichMed.rateAmount, 'hours').format()}));
-            //         startingTime = moment(startingTime).add(whichMed.rateAmount, 'hours').format();
-            //     }
-            //     beginningOfDay = moment(beginningOfDay).add(1, 'day').format();
-            //     startingTime = moment(beginningOfDay).format();
-            // }
             let totalNumberOfHours = (whichMed.howLongAmount * 24);
             for(let i=0; i < totalNumberOfHours; i += whichMed.rateAmount){
                 allEvents.push(Object.assign({}, newEvent, {"start": moment(startingTime).add(whichMed.rateAmount, 'hours').format()}));
                 startingTime = moment(startingTime).add(whichMed.rateAmount, 'hours').format();
-            }//this loop should do the same thing as the commented out one..
+            }
         return Promise.all([CalEvent.insertMany(allEvents, {new: true}),
             Patient.findByIdAndUpdate(patientId, {$addToSet : {"medsCurrentlyOn": medsArray[0]}}, {$set: true, new: true})
         ])
@@ -134,7 +123,6 @@ Router.put('/', (req, res, next)=>{
         return next(err);
     }
     const stopNow = moment().format();
-    //return 
     return Promise.all([CalEvent.find({userId, medId }).sort('start'), Patient.find({userId})])// .sort on events start time here, maybe also sort on patients
         .then(doubleData=>{
             let oldEvents = doubleData[0];
@@ -149,7 +137,6 @@ Router.put('/', (req, res, next)=>{
                      preFilter.push(anEventVar);
             }
             preFilter.forEach(each=> each?firstEventPerPerson.push(each):false);
-
             let newUpdatesEvents = [];
             let allEventsPerPerson = [];
             let startingTime = moment().format();
@@ -181,7 +168,7 @@ Router.put('/:id', (req, res, next)=>{
     let { title, patientId, medId } = req.body;
     const userId = req.user.id;
     const id = req.params.id;
-    //validate body ^^ and also id
+    //validate body and also id
     const goodId = checkIdIsValid(id);
     if(!goodId) {
         const err = new Error('invalid Id in url');
@@ -189,7 +176,7 @@ Router.put('/:id', (req, res, next)=>{
         return next(err);
     }
     if(!checkString(title)){
-        title = "Default title for now";//change me later
+        title = "Default title";
     }
     if(!checkIdIsValid(patientId, medId, userId)){
         const err = new Error('Invalid id in request body');
@@ -202,7 +189,7 @@ Router.put('/:id', (req, res, next)=>{
         .then(data => res.json(data))
         .catch(err => next(err));
 });
-
+//this route is for removing only all future scheduled events, leaving the past events as a record
 Router.delete('/future/', (req, res, next)=>{
     const { medId, patientId } = req.body;
     //check id
@@ -223,7 +210,7 @@ Router.delete('/future/', (req, res, next)=>{
                 return CalEvent.find({userId})
                     .then(allEventsForAllTheirMeds=> {
                         res.json(allEventsForAllTheirMeds)
-                    });
+                    });//send response of all users SoT events so they can match client state to SoT directly
             })
         })
         .catch(err=>{
@@ -244,7 +231,7 @@ Router.delete('/one/:id', (req, res, next)=>{
     //delete it
     return CalEvent.findOneAndRemove({"_id": id, userId})
         .then(()=>{
-            //send back all the user's remaining events so their state will be correctly set.
+            //send back all the user's remaining events so their state will be correctly set to SoT.
             return CalEvent.find({userId})
                 .then(data=>res.json(data))
                 .catch(err=>next(err));

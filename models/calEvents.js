@@ -8,10 +8,8 @@ const calEventsSchema = new mongoose.Schema({
     patientId : {type: mongoose.Schema.Types.ObjectId, ref: 'Patient', required : true},
     medId : {type: mongoose.Schema.Types.ObjectId, ref: 'Med', required : true},
     userId : {type: mongoose.Schema.Types.ObjectId, ref: 'User', required : true},
-    //remember the event does not care how often, or how many events will be created at once.
 });
 
-// Add `createdAt` and `updatedAt` fields, useful
 calEventsSchema.set('timestamps', true);
 
 calEventsSchema.set('toJSON', {

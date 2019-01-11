@@ -27,7 +27,7 @@ function checkArrayOfObjects(testArray){
     if(Array.isArray(testArray)){
         if(testArray.length > 0){
             let onlyIds = testArray.map(each=> each._id);
-            if(testArray[0].name && checkIdIsValid(onlyIds)){//might need to be [...onlyIds]
+            if(testArray[0].name && checkIdIsValid(onlyIds)){
                 return true;
             }
         } else if(testArray.length === 0){
@@ -105,10 +105,10 @@ function checkUserIdExists(checkMe, againstMe, next){
     .catch(err=>next(err));
 }
 function boolCheck(checkMe){
-    return (checkMe === "true");//client json transforms boolean into string so the amazing bool code got changed into this :(
+    return (checkMe === "true");
 }
 function validEmailAddress(checkMe){
     const EmailRegExp = /^\w+@\w+[.]\w{1,4}$/gi;
-    return EmailRegExp.test(checkMe); //gonna be fun testing this in mocha
+    return EmailRegExp.test(checkMe);
 }
 module.exports = { checkIdIsValid, checkString, addOnlyValidFields, checkUsernameAndPassword, trimName, checkUserIdExists, boolCheck, validEmailAddress, checkArray, checkArrayOfObjects, checkNumberAboveZero, checkTime };

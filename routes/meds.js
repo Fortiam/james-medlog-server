@@ -2,12 +2,12 @@ const express = require('express');
 const Router = express.Router();
 const passport = require('passport');
 const Med = require('../models/meds');
-const User = require('../models/users');
 const Log = require('../models/logs');
 const Patient = require('../models/patients');
 const CalEvent = require('../models/calEvents');
 const moment = require('moment');
 const { checkIdIsValid, checkArray, checkNumberAboveZero, checkString } = require('../utils/validate');
+
 //protected endpoints with jwt
 Router.use('/', passport.authenticate('jwt', {session : false, failWithError: true }));
 //get all meds route
@@ -34,8 +34,8 @@ Router.get('/:id', (req, res, next)=>{
 //create new med
 Router.post('/', (req, res, next)=>{
     const userId = req.user.id;
-    let { name, dosage, rateAmount,  howLongAmount/*, rateInterval, howLongForDays*/ } = req.body;
-    const goodStrings = checkArray([name, dosage, /*rateInterval, howLongForDays*/]);
+    let { name, dosage, rateAmount,  howLongAmount } = req.body;
+    const goodStrings = checkArray([name, dosage]);
     if(!goodStrings){
         const err = new Error("Missing data in request body");
         err.status = 400;
@@ -48,7 +48,7 @@ Router.post('/', (req, res, next)=>{
     }
     rateAmount = Number(rateAmount);
     howLongAmount = Number(howLongAmount);
-    return Med.create({userId, name, dosage, rateAmount, howLongAmount,/* rateInterval, howLongForDays*/})
+    return Med.create({userId, name, dosage, rateAmount, howLongAmount })
         .then(data=>res.json(data))
         .catch(err=>next(err));
 });
@@ -62,7 +62,7 @@ Router.put('/:id', (req, res, next)=>{
         return next(err);
     }
     const userId = req.user.id;
-    let { name, dosage, rateAmount, howLongAmount, /*rateInterval,  howLongForDays */} = req.body;
+    let { name, dosage, rateAmount, howLongAmount } = req.body;
     const updateObj = {};
     if(checkNumberAboveZero(rateAmount)){
         updateObj['rateAmount'] = Number(rateAmount);
